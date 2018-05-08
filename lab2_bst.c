@@ -74,32 +74,32 @@ lab2_node * lab2_node_create(int key) {
  */
 int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
     // You need to implement lab2_node_insert function.
-    lab2_node *seek=*tree;
     int gap=0;
     if(seek==NULL){
-        (*tree)=lab2_node_create(new_node->key);
+        tree->root=new_node;
         return 1;
     }
+    lab2_node *now=tree->root;
     while(1){
-        gap=seek->key-new_node->key;
+        gap=now->key-new_node->key;
         if(gap==0){
             return 0;
         }
         if(gap>0){
             if(seek->left){
-                seek=seek->left;
+                now=now->left;
             }
             else{
-                seek->left=lab2_node_create(new_node->key);
+                now->left=new_node;
                 return 1;
             }
         }
         else{
-            if(seek->right){
-                seek=seek->right;
+            if(now->right){
+                now=now->right;
             }
             else{
-                seek->right=lab2_node_create(new_node->key);
+                now->right=new_node;
                 return 1;
             }
         }
