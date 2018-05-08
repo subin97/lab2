@@ -1,8 +1,8 @@
 /*
 *	Operating System Lab
 *	    Lab2 (Synchronization)
-*	    Student id : 32164640
-*	    Student name : 최수빈
+*	    Student id : 32164640 /32162045 /32161391
+*	    Student name : 최수빈 /백예은   /노유진
 *
 *   lab2_bst.c :
 *       - thread-safe bst code.
@@ -28,10 +28,23 @@
  */
 int lab2_node_print_inorder(lab2_tree *tree) {
     // You need to implement lab2_node_print_inorder function.
-    //if(tree==NULL) return;
-    //inorder(tree->left);
-   // printf("%d ",now->key);
-   // inorder(now->right);
+	if (tree->root == NULL) {          //트리가 비었을 때
+		printf("tree is empty");
+		return 0;                   //실패
+	}	 
+
+	return inorder(tree->root);//중위순회 성공시 1 return
+}
+
+int inorder(lab2_node *now) {
+
+	if (now == NULL)
+		return 0;
+
+	inorder(now->left);
+	printf("%d ", now->key);
+	inorder(now->right);
+	return 1;//순회 마치면 1 return
 }
 
 /*
@@ -43,8 +56,8 @@ int lab2_node_print_inorder(lab2_tree *tree) {
  */
 lab2_tree *lab2_tree_create() {
     // You need to implement lab2_tree_create function.
-    lab2_tree *tree;
-    tree=NULL;
+    lab2_tree *tree=(lab2_tree*)malloc(sizeof(lab2_tree));
+    tree->root=NULL;
     return tree;
 }
 
@@ -75,7 +88,7 @@ lab2_node * lab2_node_create(int key) {
 int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
     // You need to implement lab2_node_insert function.
     int gap=0;
-    if(tree==NULL){
+    if(tree->root==NULL){
         tree->root=new_node;
         return 1;
     }
@@ -198,7 +211,89 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
  */
 int lab2_node_remove(lab2_tree *tree, int key) {
     // You need to implement lab2_node_remove function.
+	lab2_node *p = tree->root;//
+	lab2_node *q = p;
+
+	while (p) {
+		if (key == p->key)//삭제할 key가 존재하면 빠져나옴
+			break;
+		else if (key < p->key) {
+			q = p;
+			p = p->left;
+		}
+		else {
+			q = p;
+			p = p->right;
+		}
+	}
+
+	if (!p) {
+		printf("no vlaue for removing\n");
+		return 0;
+	}
+
+	if (p->left || p->right) {//하나이상의 자식을 가진 경우
+
+		if (p->left && p->right) {
+			lab2_node *t = p;
+			q = p;
+			p = p->right;
+			for (; p->left; p = p->left) {
+				q = p;
+
+				if (p->right) {
+					if (t == q) {
+						t->key = p->key;
+						q->right = p->right;
+					}
+
+					else {
+						t->key = p->key;
+						q->left = p->right;
+					}
+				}
+
+				else {
+					t->key = p->key;
+					t->left = p->left;
+				}
+			}
+		}
+
+		else {//자식이 하나일 경우
+			if (p->key < q->key) {
+				if (p->left)
+					q->left = p->left;
+				else
+					q->left = p->right;
+			}
+
+			else {
+				if (p->left)
+					q->right = p->left;
+				else
+					q->right = p->right;
+			}
+		}
+	}
+
+	else {
+		if (p == tree->root)//root노드를 삭제할 경우
+			tree->root = 0;
+
+		else if (p->key < q->key)
+			q->left = 0;
+
+		else
+			q->right = 0;
+	}
+
+	lab2_node_delete(p);
+	printf("deleting complete\n");
+	return 1;
+
 }
+
 
 /* 
  * TODO
@@ -236,7 +331,7 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
  */
 void lab2_tree_delete(lab2_tree *tree) {
     // You need to implement lab2_tree_delete function.
-    
+	free(tree);    
 }
 
 /*
