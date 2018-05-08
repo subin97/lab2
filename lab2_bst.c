@@ -19,6 +19,8 @@
 
 #include "lab2_sync_types.h"
 
+pthread_mutex_t lock;
+
 /*
  * TODO
  *  Implement funtction which traverse BST in in-order
@@ -131,7 +133,7 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
 int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
       // You need to implement lab2_node_insert_fg function.
     int gap=0;
-    if(tree==NULL){
+    if(tree->root==NULL){
         tree->root=new_node;
         return 1;
      }
@@ -168,22 +170,27 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
  */
 int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
     // You need to implement lab2_node_insert_cg function.
+    pthread_mutex_lock(&lock);
     int gap=0;
-    if(tree==NULL){
+    if(tree->root==NULL){
         tree->root=new_node;
+        pthread_mutex_unlock(&lock);
         return 1;
     }
     lab2_node *now=tree->root;
 
     while(1){
         gap=now->key-new_node->key;
-        if(gap==0){return 0;}
+        if(gap==0){
+            pthread_mutex_unlock(&lock);
+            return 0;}
         if(gap>0){
             if(now->left){
                 now=now->left;
             }
             else{
                 now->left=new_node;
+                pthread_mutex_unlock(&lock);
                 return 1;
             }
         }
@@ -193,10 +200,12 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
             }
             else{
                 now->right=new_node;
+                pthread_mutex_unlock(&lock);
                 return 1;
             }
         }
     }
+    pthread_mutex_unlock(&lock);
     return 1;
 }
 
@@ -305,6 +314,89 @@ int lab2_node_remove(lab2_tree *tree, int key) {
  */
 int lab2_node_remove_fg(lab2_tree *tree, int key) {
     // You need to implement lab2_node_remove_fg function.
+        // You need to implement lab2_node_remove function.
+	lab2_node *p = tree->root;//
+	lab2_node *q = p;
+
+	while (p) {
+		if (key == p->key)//삭제할 key가 존재하면 빠져나옴
+			break;
+		else if (key < p->key) {
+			q = p;
+			p = p->left;
+		}
+		else {
+			q = p;
+			p = p->right;
+		}
+	}
+
+	if (!p) {
+		printf("no vlaue for removing\n");
+		return 0;
+	}
+
+	if (p->left || p->right) {//하나이상의 자식을 가진 경우
+
+		if (p->left && p->right) {
+			lab2_node *t = p;
+			q = p;
+			p = p->right;
+			for (; p->left; p = p->left) {
+				q = p;
+
+				if (p->right) {
+					if (t == q) {
+						t->key = p->key;
+						q->right = p->right;
+					}
+
+					else {
+						t->key = p->key;
+						q->left = p->right;
+					}
+				}
+
+				else {
+					t->key = p->key;
+					t->left = p->left;
+				}
+			}
+		}
+
+		else {//자식이 하나일 경우
+			if (p->key < q->key) {
+				if (p->left)
+					q->left = p->left;
+				else
+					q->left = p->right;
+			}
+
+			else {
+				if (p->left)
+					q->right = p->left;
+				else
+					q->right = p->right;
+			}
+		}
+	}
+
+	else {
+		if (p == tree->root)//root노드를 삭제할 경우
+			tree->root = 0;
+
+		else if (p->key < q->key)
+			q->left = 0;
+
+		else
+			q->right = 0;
+	}
+
+	lab2_node_delete(p);
+	printf("deleting complete\n");
+	return 1;
+
+
 }
 
 
@@ -318,6 +410,91 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
  */
 int lab2_node_remove_cg(lab2_tree *tree, int key) {
     // You need to implement lab2_node_remove_cg function.
+    pthread_mutex_lock(&lock);
+	lab2_node *p = tree->root;//
+	lab2_node *q = p;
+
+	while (p) {
+		if (key == p->key)//삭제할 key가 존재하면 빠져나옴
+			break;
+		else if (key < p->key) {
+			q = p;
+			p = p->left;
+		}
+		else {
+			q = p;
+			p = p->right;
+		}
+	}
+
+	if (!p) {
+		printf("no vlaue for removing\n");
+        pthread_mutex_unlock(&lock);
+		return 0;
+	}
+
+	if (p->left || p->right) {//하나이상의 자식을 가진 경우
+
+		if (p->left && p->right) {
+			lab2_node *t = p;
+			q = p;
+			p = p->right;
+			for (; p->left; p = p->left) {
+				q = p;
+
+				if (p->right) {
+					if (t == q) {
+						t->key = p->key;
+						q->right = p->right;
+					}
+
+					else {
+						t->key = p->key;
+						q->left = p->right;
+					}
+				}
+
+				else {
+					t->key = p->key;
+					t->left = p->left;
+				}
+			}
+		}
+
+		else {//자식이 하나일 경우
+			if (p->key < q->key) {
+				if (p->left)
+					q->left = p->left;
+				else
+					q->left = p->right;
+			}
+
+			else {
+				if (p->left)
+					q->right = p->left;
+				else
+					q->right = p->right;
+			}
+		}
+	}
+
+	else {
+		if (p == tree->root)//root노드를 삭제할 경우
+			tree->root = 0;
+
+		else if (p->key < q->key)
+			q->left = 0;
+
+		else
+			q->right = 0;
+	}
+
+	lab2_node_delete(p);
+	printf("deleting complete\n");
+    pthread_mutex_unlock(&lock);
+	return 1;
+
+
 }
 
 
