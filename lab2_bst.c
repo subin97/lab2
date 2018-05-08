@@ -28,10 +28,10 @@
  */
 int lab2_node_print_inorder(lab2_tree *tree) {
     // You need to implement lab2_node_print_inorder function.
-    if(tree==NULL) return;
-    inorder(tree->left);
-    printf("%d ",now->key);
-    inorder(now->right);
+    //if(tree==NULL) return;
+    //inorder(tree->left);
+   // printf("%d ",now->key);
+   // inorder(now->right);
 }
 
 /*
@@ -44,8 +44,8 @@ int lab2_node_print_inorder(lab2_tree *tree) {
 lab2_tree *lab2_tree_create() {
     // You need to implement lab2_tree_create function.
     lab2_tree *tree;
-    *tree=NULL;
-    return *tree;
+    tree=NULL;
+    return tree;
 }
 
 /*
@@ -75,7 +75,7 @@ lab2_node * lab2_node_create(int key) {
 int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
     // You need to implement lab2_node_insert function.
     int gap=0;
-    if(seek==NULL){
+    if(tree==NULL){
         tree->root=new_node;
         return 1;
     }
@@ -86,7 +86,7 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
             return 0;
         }
         if(gap>0){
-            if(seek->left){
+            if(now->left){
                 now=now->left;
             }
             else{
