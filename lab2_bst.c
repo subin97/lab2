@@ -117,26 +117,27 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
  */
 int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
       // You need to implement lab2_node_insert_fg function.
-    lab2_node *seek = *new_node;
     int gap=0;
-    if(seek==NULL){
-        (*tree)=lab2_node_create(new_node->key);
-         return 1;
+    if(tree==NULL){
+        tree->root=new_node;
+        return 1;
      }
-     while(1){
-        gap=seek->key-new_node->key;
+    lab2_node *now=tree->root;
+    
+    while(1){
+        gap=now->key-new_node->key;
         if(gap==0) return 0;
         if(gap>0){
-            if(seek->left) seek=seek->left;
+            if(now->left) now=now->left;
             else{    
-                seek->left=lab2_node_create(new_node->key);
+                now->left=new_node;
                 return 1;  
             }
         }
         else{              
-            if(seek->right){seek=seek->right;} 
+            if(now->right){now=now->right;} 
             else{  
-                seek->right=lab2_node_create(new_node->key);  
+                now->right=new_node;  
                 return 1; 
             }
         }
@@ -154,8 +155,38 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
  */
 int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
     // You need to implement lab2_node_insert_cg function.
-    
+    int gap=0;
+    if(tree==NULL){
+        tree->root=new_node;
+        return 1;
+    }
+    lab2_node *now=tree->root;
+
+    while(1){
+        gap=now->key-new_node->key;
+        if(gap==0){return 0;}
+        if(gap>0){
+            if(now->left){
+                now=now->left;
+            }
+            else{
+                now->left=new_node;
+                return 1;
+            }
+        }
+        else{
+            if(now->right){
+                now=now->right;
+            }
+            else{
+                now->right=new_node;
+                return 1;
+            }
+        }
+    }
+    return 1;
 }
+
 
 /* 
  * TODO
