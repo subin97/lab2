@@ -132,32 +132,51 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
  */
 int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
       // You need to implement lab2_node_insert_fg function.
-    int gap=0;
-    if(tree->root==NULL){
-        tree->root=new_node;
-        return 1;
-     }
-    lab2_node *now=tree->root;
-    
-    while(1){
-        gap=now->key-new_node->key;
-        if(gap==0) return 0;
-        if(gap>0){
-            if(now->left) now=now->left;
-            else{    
-                now->left=new_node;
-                return 1;  
-            }
-        }
-        else{              
-            if(now->right){now=now->right;} 
-            else{  
-                now->right=new_node;  
-                return 1; 
-            }
-        }
-     }
-      return 1;
+	int gap=0;
+
+	pthread_mutex_lock(&lock);
+	if(tree->root==NULL){
+        	tree->root=new_node;
+		pthread_mutex_unlock(&lock);
+        	return 1;
+     	}
+	pthread_mutex_unlock(&lock);
+
+	lab2_node *now=tree->root;
+   
+	while(1){
+	     	gap=now->key-new_node->key;
+		if(now!=NULL){
+                	pthread_mutex_lock(&(now->mutex));
+		}
+
+	       	if(gap==0) {
+			pthread_mutex_unlock(&(now->mutex));
+			return 0;
+		}
+        	else if(gap>0) {
+            		if(now->left) {
+				pthread_mutex_unlock(&(now->mutex));
+				now=now->left;				
+			}
+            		else{  
+                		now->left=new_node;
+                		pthread_mutex_unlock(&(now->mutex));
+				return 1;  
+            		}
+        	}
+        	else{              
+            		if(now->right){
+				pthread_mutex_unlock(&(now->mutex));
+				now=now->right;
+				} 
+            		else{  
+             			now->right=new_node;  
+				pthread_mutex_unlock(&(now->mutex));
+                		return 1; 
+            		}
+        	}	
+     	}
 }
 
 /* 
@@ -237,7 +256,6 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 	}
 
 	if (!p) {
-		printf("no vlaue for removing\n");
 		return 0;
 	}
 
@@ -298,9 +316,7 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 	}
 
 	lab2_node_delete(p);
-	printf("deleting complete\n");
 	return 1;
-
 }
 
 
@@ -315,6 +331,7 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 int lab2_node_remove_fg(lab2_tree *tree, int key) {
     // You need to implement lab2_node_remove_fg function.
         // You need to implement lab2_node_remove function.
+	
 	lab2_node *p = tree->root;//
 	lab2_node *q = p;
 
@@ -332,7 +349,6 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 	}
 
 	if (!p) {
-		printf("no vlaue for removing\n");
 		return 0;
 	}
 
@@ -393,7 +409,6 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 	}
 
 	lab2_node_delete(p);
-	printf("deleting complete\n");
 	return 1;
 
 
@@ -428,8 +443,7 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
 	}
 
 	if (!p) {
-		printf("no vlaue for removing\n");
-        pthread_mutex_unlock(&lock);
+        	pthread_mutex_unlock(&lock);
 		return 0;
 	}
 
@@ -490,8 +504,7 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
 	}
 
 	lab2_node_delete(p);
-	printf("deleting complete\n");
-    pthread_mutex_unlock(&lock);
+   	pthread_mutex_unlock(&lock);
 	return 1;
 
 
@@ -508,7 +521,7 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
  */
 void lab2_tree_delete(lab2_tree *tree) {
     // You need to implement lab2_tree_delete function.
-	free(tree);    
+	free(tree); 
 }
 
 /*
@@ -521,6 +534,8 @@ void lab2_tree_delete(lab2_tree *tree) {
  */
 void lab2_node_delete(lab2_node *node) {
     // You need to implement lab2_node_delete function.
-    free(node);
+  	node=NULL;
+	 free(node);
+
 }
 
